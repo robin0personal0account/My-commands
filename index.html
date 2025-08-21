@@ -1,1 +1,591 @@
-am start -n com.instagram.android/.activity.MainTabActivity
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Android ADB Commands</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #2196F3;
+        }
+
+        .logo h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .search-container {
+            position: relative;
+            width: 40%;
+        }
+
+        #search {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 3rem;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        #search:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .intro {
+            background-color: white;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .intro h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .intro p {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .command-card {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .command-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem 0;
+        }
+
+        .card-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1rem 1.5rem;
+        }
+
+        .command-text {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #333;
+            word-break: break-all;
+            position: relative;
+            padding-right: 3rem;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 0.75rem;
+            top: 0.75rem;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #0b7dda;
+        }
+
+        .card-footer {
+            padding: 0 1.5rem 1.25rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .execute-btn {
+            background: transparent;
+            color: #2196F3;
+            border: 1px solid #2196F3;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .execute-btn:hover {
+            background: #2196F3;
+            color: white;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            padding: 0.5rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-btn.active, .category-btn:hover {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+
+        footer {
+            background-color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .search-container {
+                width: 100%;
+            }
+            
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-terminal"></i>
+                <h1>Android ADB Commands</h1>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search" placeholder="Search commands...">
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="intro">
+            <h2>ADB Commands Collection</h2>
+            <p>This is a comprehensive list of ADB (Android Debug Bridge) commands for various tasks. Use the copy button to easily copy commands to your clipboard.</p>
+            <p>Note: Some commands may require root access or specific permissions to work properly.</p>
+        </div>
+
+        <div class="category-filter" id="categoryFilter">
+            <!-- Categories will be generated by JavaScript -->
+        </div>
+
+        <div class="commands-grid" id="commandsContainer">
+            <!-- Command cards will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <div class="toast" id="copyToast">Command copied to clipboard!</div>
+
+    <footer>
+        <p>ADB Commands Reference &copy; 2023</p>
+    </footer>
+
+    <script>
+        // Your JSON data
+        const commandsData = [
+          {
+            "use": "Open YouTube app",
+            "command": "am start -n com.google.android.youtube/.HomeActivity",
+            "category": "apps"
+          },
+          {
+            "use": "Open Chrome browser",
+            "command": "am start -n com.android.chrome/com.google.android.apps.chrome.Main",
+            "category": "apps"
+          },
+          {
+            "use": "Open WhatsApp",
+            "command": "am start -n com.whatsapp/.Main",
+            "category": "apps"
+          },
+          {
+            "use": "Open Instagram",
+            "command": "am start -n com.instagram.android/.activity.MainTabActivity",
+            "category": "apps"
+          },
+          {
+            "use": "Open Facebook",
+            "command": "am start -n com.facebook.katana/.LoginActivity",
+            "category": "apps"
+          },
+          {
+            "use": "Open Settings",
+            "command": "am start -a android.settings.SETTINGS",
+            "category": "system"
+          },
+          {
+            "use": "Open Wi-Fi settings",
+            "command": "am start -a android.settings.WIFI_SETTINGS",
+            "category": "system"
+          },
+          {
+            "use": "Open Bluetooth settings",
+            "command": "am start -a android.settings.BLUETOOTH_SETTINGS",
+            "category": "system"
+          },
+          {
+            "use": "Open Contacts app",
+            "command": "am start -a android.intent.action.MAIN -n com.android.contacts/.activities.PeopleActivity",
+            "category": "apps"
+          },
+          {
+            "use": "Open Phone dialer",
+            "command": "am start -a android.intent.action.DIAL",
+            "category": "apps"
+          },
+          {
+            "use": "Make a phone call",
+            "command": "am start -a android.intent.action.CALL -d tel:1234567890",
+            "category": "apps"
+          },
+          {
+            "use": "Open Camera app",
+            "command": "am start -a android.media.action.IMAGE_CAPTURE",
+            "category": "apps"
+          },
+          {
+            "use": "Send text input",
+            "command": "input text 'Hello_World'",
+            "category": "input"
+          },
+          {
+            "use": "Press Enter key",
+            "command": "input keyevent 66",
+            "category": "input"
+          },
+          {
+            "use": "Press Back button",
+            "command": "input keyevent 4",
+            "category": "input"
+          },
+          {
+            "use": "Press Home button",
+            "command": "input keyevent 3",
+            "category": "input"
+          },
+          {
+            "use": "Press Power button",
+            "command": "input keyevent 26",
+            "category": "input"
+          },
+          {
+            "use": "Press Volume Up",
+            "command": "input keyevent 24",
+            "category": "input"
+          },
+          {
+            "use": "Tap on screen (x=500,y=500)",
+            "command": "input tap 500 500",
+            "category": "input"
+          },
+          {
+            "use": "Take screenshot (Android 9+)",
+            "command": "input keyevent 120",
+            "category": "media"
+          },
+          {
+            "use": "Get device model",
+            "command": "getprop ro.product.model",
+            "category": "device info"
+          },
+          {
+            "use": "Get Android version",
+            "command": "getprop ro.build.version.release",
+            "category": "device info"
+          },
+          {
+            "use": "Get battery level and status",
+            "command": "dumpsys battery",
+            "category": "device info"
+          },
+          {
+            "use": "Reboot into recovery mode",
+            "command": "reboot recovery",
+            "category": "system"
+          },
+          {
+            "use": "List all installed packages",
+            "command": "pm list packages",
+            "category": "package manager"
+          },
+          {
+            "use": "Clear app data and cache (e.g., for Chrome)",
+            "command": "pm clear com.android.chrome",
+            "category": "package manager"
+          }
+        ];
+
+        // Add categories to the data
+        function categorizeCommands() {
+            commandsData.forEach(cmd => {
+                if (!cmd.category) {
+                    if (cmd.command.startsWith('am start')) {
+                        cmd.category = 'apps';
+                    } else if (cmd.command.startsWith('input')) {
+                        cmd.category = 'input';
+                    } else if (cmd.command.startsWith('pm')) {
+                        cmd.category = 'package manager';
+                    } else if (cmd.command.startsWith('getprop') || cmd.command.startsWith('dumpsys')) {
+                        cmd.category = 'device info';
+                    } else if (cmd.command.includes('reboot') || cmd.command.includes('settings')) {
+                        cmd.category = 'system';
+                    } else {
+                        cmd.category = 'other';
+                    }
+                }
+            });
+        }
+
+        // Generate category buttons
+        function generateCategoryFilters() {
+            const categories = [...new Set(commandsData.map(cmd => cmd.category))];
+            const categoryFilter = document.getElementById('categoryFilter');
+            
+            // Add "All" button
+            const allButton = document.createElement('button');
+            allButton.classList.add('category-btn', 'active');
+            allButton.textContent = 'All';
+            allButton.setAttribute('data-category', 'all');
+            allButton.addEventListener('click', filterCommands);
+            categoryFilter.appendChild(allButton);
+            
+            // Add category buttons
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.classList.add('category-btn');
+                button.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+                button.setAttribute('data-category', category);
+                button.addEventListener('click', filterCommands);
+                categoryFilter.appendChild(button);
+            });
+        }
+
+        // Filter commands by category
+        function filterCommands(e) {
+            const category = e.target.getAttribute('data-category');
+            
+            // Update active button
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.target.classList.add('active');
+            
+            // Filter commands
+            if (category === 'all') {
+                document.querySelectorAll('.command-card').forEach(card => {
+                    card.style.display = 'block';
+                });
+            } else {
+                document.querySelectorAll('.command-card').forEach(card => {
+                    if (card.getAttribute('data-category') === category) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        // Generate command cards
+        function generateCommandCards() {
+            const commandsContainer = document.getElementById('commandsContainer');
+            
+            commandsData.forEach(cmd => {
+                const card = document.createElement('div');
+                card.classList.add('command-card');
+                card.setAttribute('data-category', cmd.category);
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3>${cmd.use}</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="command-text">
+                            ${cmd.command}
+                            <button class="copy-btn" title="Copy command">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="execute-btn">Execute</button>
+                    </div>
+                `;
+                
+                // Add copy functionality
+                const copyBtn = card.querySelector('.copy-btn');
+                copyBtn.addEventListener('click', () => {
+                    copyToClipboard(cmd.command);
+                    showToast();
+                });
+                
+                commandsContainer.appendChild(card);
+            });
+        }
+
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        // Show toast notification
+        function showToast() {
+            const toast = document.getElementById('copyToast');
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('search');
+            
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                document.querySelectorAll('.command-card').forEach(card => {
+                    const useText = card.querySelector('h3').textContent.toLowerCase();
+                    const commandText = card.querySelector('.command-text').textContent.toLowerCase();
+                    
+                    if (useText.includes(searchTerm) || commandText.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Initialize the page
+        function init() {
+            categorizeCommands();
+            generateCategoryFilters();
+            generateCommandCards();
+            setupSearch();
+        }
+
+        // Run initialization when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+  </html>
